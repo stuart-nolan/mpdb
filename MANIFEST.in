@@ -1,0 +1,4 @@
+include mpdb/eq/*.pyx
+include mpdb/libreOffice/*.bas
+include mpdb/libreOffice/*.odg
+include mpdb/libreOffice/*.ods

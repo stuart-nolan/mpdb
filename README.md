@@ -1,7 +1,7 @@
 # mpdb
-Material Property Data Base
+(A personal) Material Property Data Base
 
-Revision Date: 2021.08.21
+Revision Date: 2021.09.02
 
 SPDX-License-Identifier: BSD-2-Clause
 Copyright (c) 2021 Stuart Nolan. All rights reserved.
@@ -11,9 +11,9 @@ Copyright (c) 2021 Stuart Nolan. All rights reserved.
     cd mpdb; python setup.py install
     
 #### Notes
-Pre-release version 0.1a0.  Expect significant and possibly nasty
-change. Stay away for now.  Yaws and cost index data are not now and
-will likely never be available here.
+Pre-release version 0.1a0.  Expect significant nasty errors and
+change.  Stay away for now.  Yaws and cost index data are not now
+and will likely never be available here.
 
 ## References & Attribution
 - slop: https://gitlab.com/ENKI-portal/geopig/-/tree/master/slop

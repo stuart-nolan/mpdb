@@ -18,11 +18,6 @@ minimal help
 
 # BEGIN python standard library imports
 import os
-import sys
-if sys.version_info[0] != 3 or sys.version_info[1] < 5:
-    print("Python version >= 3.5 is required.")
-    sys.exit(1)
-sys.path.insert(0, "/home/ul/local/src/mpdb/")
 import io
 import csv
 import pickle
@@ -44,7 +39,6 @@ from mpdb.gui.tkMenu import tkMenubar
 from mpdb.gui.tkStatusBar import StatusBar
 from mpdb.gui.ttkNotebook import Notebook
 from mpdb.gui.ttkFilterTree import FilterTree
-from mpdb.periodicTable import fW
 from mpdb.units import *
 from mpdb.eq.yaws_python import *
 # END app library imports

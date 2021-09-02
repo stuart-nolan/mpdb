@@ -11,7 +11,7 @@ try:
     cem = cythonize("mpdb/eq/*.pyx")
 except:
     cem = []
-    
+
 setuptools.setup(
     author="Stuart Nolan",
     author_email="61199416+stuart-nolan@users.noreply.github.com",
@@ -25,10 +25,13 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     #packages = ['.'],
     install_requires=[
-        'markdown',
         'appdirs',
         'tabulate',],
     extras_require={
+        "libreOffice":['uno',],
+        "coolprop":['CoolProp',],
+        "yawsImport":["requests",],
+        "scipy": ["scipy",],
         "cython": ["Cython",],
     },
     ext_modules=cem,

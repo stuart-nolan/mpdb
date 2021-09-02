@@ -8,7 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause
 Copyright (c) 2021 Stuart Nolan. All rights reserved.
 """
 
-from mpdb.waterDielectric import waterDielectric as wD
+from mpdb.sandbox.waterDielectric import waterDielectric as wD
 from math import log
 
 class aqEOS(wD):
@@ -456,12 +456,10 @@ def llnlK(T,A):
     return A[0]+A[1]*T+A[2]/T+A[3]*log(T,10)+A[4]/T/T +A[5]*T*T
 
 if __name__ == "__main__":
+    import mpdb
     from mpdb.utils import dbLoad
-    import os
     from math import exp
-    location = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
-    dataDir = os.path.join(location,'data')
-    (mpdb, mpdbmd) = dbLoad(interactive=True,dataDir=dataDir)
+    (db, dbmd) = dbLoad(interactive=True)
     tEOS = aqEOS()
     tEOS.P = 101325 #Pa
     tEOS.T = 300+273.15 #K
@@ -484,10 +482,10 @@ if __name__ == "__main__":
     sComp = []
     dGVals = []
     for (name,pref) in aqComp:
-        (Gaqs,Haqs,Cpaqs,Saqs,Vaqs) = tEOS.aqHKF(mpdb[name])
-        #Gaqs = mpdb[name]['eFG298K']*1000 #J/mol
+        (Gaqs,Haqs,Cpaqs,Saqs,Vaqs) = tEOS.aqHKF(db[name])
+        #Gaqs = db[name]['eFG298K']*1000 #J/mol
         dGVals.append((pref,Gaqs))
-    #dGVals.append((sComp[0][0],sComp[0][1],mpdb[sComp[0][0]]['eFG298K']))
+    #dGVals.append((sComp[0][0],sComp[0][1],db[sComp[0][0]]['eFG298K']))
     dGr = 0
     for (prefix,dGc) in dGVals:
         dGr = dGr + prefix*dGc

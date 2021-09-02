@@ -17,7 +17,7 @@ import os
 from copy import deepcopy
 from mpdb.units import uc, ucTemp
 from mpdb.utils import dbLoad, dbSubset, dbFind
-from mpdb.eq.eqUtil import thermoFuncs
+from mpdb.eq.misc_python import thermoFuncs
 
 location = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))    
 

@@ -6,9 +6,13 @@ Revision Date: 2021.08.21
 SPDX-License-Identifier: BSD-2-Clause
 Copyright (c) 2021 Stuart Nolan. All rights reserved.
 """
-import json
 import os
+import sys
+if sys.version_info[0] != 3 or sys.version_info[1] < 5:
+    print("Python version >= 3.5 is required.")
+    sys.exit(1)
 import appdirs
+import json
 from pkgutil import extend_path
 
 __path__ = extend_path(__path__, __name__)

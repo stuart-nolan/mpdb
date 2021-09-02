@@ -2,15 +2,15 @@
 SPDX-License-Identifier: BSD-2-Clause
 Copyright (c) 2021 Stuart Nolan. All rights reserved.
 """
-import mpdb.eq.mCM as mCM
 from math import log
-from mpdb.utils import dbLoad, dbSubset, dbFind, thermoFuncs
-from mpdb.units import uc, ucTemp
-from mpdb.periodicTable import fW, elemCount
-from mpdb.eq import yaws_python as yeq
-from mpdb.eq import misc_cython as ceq
-import diffusionCoef as dC
 import os
+from mpdb.eq import yaws_python as yeq
+from mpdb.eq import misc_python as meq
+from mpdb.periodicTable import fW, elemCount
+import mpdb.sandbox.diffusionCoef as dC
+import mpdb.sandbox.mCM as mCM
+from mpdb.units import uc, ucTemp
+from mpdb.utils import dbLoad, dbSubset, dbFind
 
 def Le(tC,hC,rho,DAB):
     """
@@ -182,16 +182,11 @@ def combustNaturalGas(nG,
     return cProd
 
 if __name__ == "__main__":
-    """
-    """
-
-    location = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
-    
     try:
         if not isinstance(db,dict):
-            (db, dbMetaData) = dbLoad(interactive=True)
+            (db, dbmd) = dbLoad(interactive=True)
     except:
-        (db, dbMetaData) = dbLoad(interactive=True)
+        (db, dbmd) = dbLoad(interactive=True)
     # dry air mole fractions
     dAMoleFrac = {'nitrogen': 0.78084,
                   'oxygen': 0.20946,
@@ -222,7 +217,7 @@ if __name__ == "__main__":
                   dispDensUnit='mole/l',
                   db=hAdb)
     mCM.updateBasis(hA)
-    hA.update({'dbtf': thermoFuncs(db=hAdb)})
+    hA.update({'dbtf': meq.thermoFuncs(db=hAdb)})
     mCM.pTable(hA)
 
     vVL = [yeq.vaporViscosity(hA['T'],db[cID]['vVP']) for cID in hACIDList]
@@ -231,8 +226,8 @@ if __name__ == "__main__":
     vHCL = [yeq.vaporHeatCapacity(hA['T'],db[cID]['vHCP'])
             for cID in hACIDList]
     fWL = [db[cID]['fW'] for cID in hACIDList]
-    hATC = ceq.mCVTC(hAMoleFracList,vTCL,vVL,fWL)
-    hAHC = ceq.mCVHC(hAMoleFracList,vHCL)
+    hATC = meq.mCVTC(hAMoleFracList,vTCL,vVL,fWL)
+    hAHC = meq.mFWQ(hAMoleFracList,vHCL)
     evapADV = dC.fullerADV(db[evap]['formula'],ring=False)
     airADV = dC.fullerADV('air')
     fWA = db[evap]['fW']
@@ -257,7 +252,7 @@ if __name__ == "__main__":
             pSI('Cpmolar','T',cPT,'P',cPP,'Air')]
     cPV = [pSI('V','T',cPT,'Q',1,evap),pSI('V','T',cPT,'P',cPP,'Air')]
     cPHCm = yEvap*cPHC[0]+yEvapM1*cPHC[1]
-    cPTCm = ceq.mCVTC(cPMF,cPTC,cPV,[fWA,fWB])
+    cPTCm = meq.mCVTC(cPMF,cPTC,cPV,[fWA,fWB])
     cPDAB = dC.fullerD(cPT,cPP,fWA,evapADV,fWB,airADV)
     cPDAB = uc(cPDAB,"cm^2/s","m^2/s")
     cPRho = cPP/8.314/cPT # mol/m^3
@@ -307,15 +302,15 @@ if __name__ == "__main__":
                       db=nGdb)
 
     mCM.updateBasis(natGas)
-    natGas.update({'dbtf': thermoFuncs(db=nGdb)})
+    natGas.update({'dbtf': meq.thermoFuncs(db=nGdb)})
     mCM.pTable(natGas)
     
     """
-    Nist Shomate equation implementation (in mpdb/eq/ceq.pyx) 
+    Nist Shomate equation implementation (in mpdb/eq/meq.pyx) 
     validation with co2
     REF: https://webbook.nist.gov/cgi/cbook.cgi?ID=C124389&Units=SI&Mask=1&Type=JANAFG&Table=on#JANAFG
     """
-    CO2_shomate_TBounds=[[298.0, 1200.0], [1200, 6000]] # K
+    CO2_shomate_TBounds=[[298.0, 1200], [1200, 6000]] # K
     CO2_shomate_params=[[24.99735, 55.18696, -33.69137, 7.948387, 
                          -0.136638, -403.6075, 228.2431, -393.5224],
                         [58.16639, 2.720074, -0.492289, 0.038844, -6.447293,
@@ -358,37 +353,38 @@ if __name__ == "__main__":
                          [1100.,55.40,274.5,239.2,38.89],
                          [1200.,56.35,279.4,242.3,44.47]]
     
-    CO2_shomate_enthalpy=[ceq.shomate_enthalpy(val[0], CO2_shomate_params[0])
+    CO2_shomate_enthalpy=[meq.enthalpy_Shomate_bounded(val[0],
+                                                       CO2_shomate_TBounds,
+                                                       CO2_shomate_params)
                           for val in CO2_validation_data[1:]]
 
     cNG = combustNaturalGas(natGas,air=hA,excessAir=0,nGRS=nGRS)
-    cNG.update({'dbtf': thermoFuncs(db=cNG['db'])})
-    #cNG.update({'dbtf': thermoFuncs(db=cNG['db'],useCoolProp=True)})
+    cNG.update({'dbtf': meq.thermoFuncs(db=cNG['db'])})
+    #cNG.update({'dbtf': meq.thermoFuncs(db=cNG['db'],useCoolProp=True)})
     #mCM.pTable(cNG)
     
+    TRef = natGas['T']
     for cid, cQ in cNG['moleCompQ'].items():
-        cNG['dbtf'][cid].update({'vH':lambda T, sEQTB=db[cid]['sEQTB'], sEQP=db[cid]['sEQP']: ceq.shomate_enthalpy_bounded(T,sEQTB,sEQP)})
+        cNG['dbtf'][cid].update({'vH':lambda T, TRef, sEQTB=db[cid]['sEQTB'], sEQP=db[cid]['sEQP']: meq.enthalpy_Shomate_bounded(T,sEQTB,sEQP,TRef=TRef)})
     # Energy balance via vapor enthalpy of formation (vEF)
     # TRef chosen from nG input stream.
-    TRef = natGas['T']
-    #natGas.update({'dbtf': thermoFuncs(db=natGas['db'],useCoolProp=True)})
-    #hA.update({'dbtf': thermoFuncs(db=hA['db'],useCoolProp=True)})    
+    #natGas.update({'dbtf': meq.thermoFuncs(db=natGas['db'],useCoolProp=True)})
+    #hA.update({'dbtf': meq.thermoFuncs(db=hA['db'],useCoolProp=True)})    
     hAEF = sum([cQ*hA['dbtf'][cid]['vEF'](TRef) for cid,cQ in
                 hA['moleCompQ'].items()])
     nGEF = sum([cQ*natGas['dbtf'][cid]['vEF'](TRef) for cid,cQ in
                 natGas['moleCompQ'].items()])
-    # TODO: define high temp 'vEF' functions for cNG
     cNGEF = lambda T, P0=cNG,P1=hAEF,P2=nGEF:\
         sum([cQ*(db[cid]['sEQP'][0][7] +
-                 P0['dbtf'][cid]['vH'](T)/1000)
+                 P0['dbtf'][cid]['vH'](T,TRef))
              for cid, cQ in
              P0['moleCompQ'].items()])-P1-P2
     
     from scipy.optimize import fsolve
-    (T,infodict,ler,mesg)=fsolve(cNGEF,2000,full_output=1,factor=1)
+    (T,infodict,ler,mesg)=fsolve(cNGEF,1900,full_output=1,factor=1)
     cNG['T'] = float(T)
     mCM.pTable(cNG)
-    print("Temperature of combustion gas is a calculated adiabatic flame\ntemperature (dissociation not considered).  \nCurrently inaccurate due to vEF and hA correlations\n being out of range at the flame temperatures.\n Measured value: 1960 deg. C, 3562 deg. F")
+    print("Temperature of combustion gas is a calculated adiabatic flame\ntemperature (dissociation not considered).  \nMeasured value: 1960 deg. C, 3562 deg. F\nTheoretical (dissociation not considered) methane in dry air \nat 1 atm: 2054 deg. C, 3729 deg. F\nRef: http://elearning.cerfacs.fr/combustion/n7masterCourses/adiabaticflametemperature/index.php")
 
-    cNGE=sum([mf*cNG['dbtf'][cid]['vH'](cNG['T']) for
+    cNGE=sum([mf*cNG['dbtf'][cid]['vH'](cNG['T'],TRef) for
               cid, mf in cNG['moleFrac'].items()])

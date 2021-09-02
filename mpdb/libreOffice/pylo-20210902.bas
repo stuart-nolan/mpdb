@@ -1,16 +1,25 @@
 'mpdb: Material Property Data Base
 '
-'Revision Date: 2021.08.19
+'Revision Date: 2021.09.02
 '
 'SPDX-License-Identifier: BSD-2-Clause
 'Copyright (c) 2021 Stuart Nolan. All rights reserved.
 '
-'Install:
-'import this file into libreOffice
-'
-'create the directory ~/<path to libreOffice config>/<version>/user/Scripts/python
-'and place python scripts (or links to them) in this directory
+'BEGIN Install:
+'- install libreOffice, any requirments for using python scripts from
+'  libreOffice, pyUNO, and "units"
+'- create the libreOffice python scripts directory and place libreOffice
+'  related python scripts (or links to them) in this directory
+'- import this pylo-*.bas into libreOffice macros,
 'e.g. On Ubuntu:
+'sudo apt install libreoffice libreoffice-script-provider-python python3-uno
+'python3-appdirs python3-tabulate python3-scipy units
+'# optional: if using python3-uno with a python virtual env (not required
+'# or used in this file): 
+'ln -s /usr/lib/python3/dist-packages/uno.py <python>/<virt>/<env>/site-packages/uno.py
+'ln -s /usr/lib/python3/dist-packages/unohelper.p <python>/<virt>/<env>/site-packages/unohelper.py
+'# on ubuntu, libreOffice looks for scripts here:
+'mkdir ${HOME}/.config/libreoffice/4/user/Scripts/python
 'lopyDir=${HOME}/.config/libreoffice/4/user/Scripts/python
 'mpdbDir=${HOME}/local/src/github/mpdb/src/mpdb/
 'mkdir ${lopyDir}
@@ -19,7 +28,11 @@
 'ln -s ${mpdbDir}/units.py units.py
 'ln -s ${mpdbDir}/periodicTable.py periodicTable.py
 'ln -s ${mpdbDir}/costIndexes.py costIndexes.py
-
+'
+'NOTE: libereOffice will use it's own python installation or, on ubuntu,
+'      system python.  I have yet to find a way for macros in this file
+'      to utilize an user installed python such as anaconda or pyenv
+'END Install
 option explicit
 
 Global masterScriptProvider as object

@@ -6,7 +6,6 @@ from math import sqrt, exp
 import os
 import re
 import csv
-import inspect
     
 def fullerADV(formula, ring=False, numRing = 1):
     """
@@ -247,11 +246,8 @@ def lJ0(Tc, Vc):
     return [0.841*Vc**(1/3),0.75*Tc]
 
 def lJDB():
-    #kludge for __file__ and sys.argv[0] not working when called from exec()
-    dbDir = os.path.dirname(os.path.realpath(inspect.getabsfile(lJDB)))
-    lJDBPath = os.path.join(dbDir,'..','lennardJones')
-    csvFileName = 'lennardJones.csv'
-    fileHandle = open(os.path.join(lJDBPath,csvFileName),'r')
+    ljcsvFQPN = os.path.join(mpdb.pref['dataDir'], 'lennardJones.csv')
+    fileHandle = open(ljcsvFQPN,'r')
 
     csvReader = csv.DictReader(fileHandle,dialect='excel')
     db = {}
@@ -293,19 +289,16 @@ if __name__ == "__main__":
     DAB_data = [[compA, compB, Temp. /K, Pres. /atm, DAB /cm^2/s, ref.]]
     """
     import mpdb
-    from mpdb.utils import *
-    from mpdb.units import uc, ucTemp
-    from mpdb.periodicTable import fW
-    from mpdb.pcmpEQ import *
+    from mpdb.eq.yaws_python import liquidDensity as lD
+    from mpdb.utils import dbLoad
+    from mpdb.units import uc
     from tabulate import tabulate
 
-    location = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
-    
     try:
         if not isinstance(db,dict):
-            (db, dbMetaData) = dbLoad(interactive=True)
+            (db, dbmd) = dbLoad(interactive=True)
     except:
-        (db, dbMetaData) = dbLoad(interactive=True)
+        (db, dbmd) = dbLoad(interactive=True)
 
     DAB_data = [["carbon dioxide","nitrous oxide",273.2,1.0,0.096,1],
                 ["carbon dioxide","carbon monoxide",273.2,1.0,0.139,1],
@@ -320,10 +313,10 @@ if __name__ == "__main__":
     k = 1.38064852E-23 # m^2*kg/s^2/K or Pa m^3/K
     DAB_corr = []
     for idx,dat in enumerate(DAB_data):
-        PcA = uc(db[dat[0]]['critP'],dbMetaData[dat[0]]['critP']['units'],"atm")
+        PcA = uc(db[dat[0]]['critP'],dbmd[dat[0]]['critP']['units'],"atm")
         TcA = db[dat[0]]['critT']
         mWA = db[dat[0]]['fW']
-        PcB = uc(db[dat[1]]['critP'],dbMetaData[dat[1]]['critP']['units'],"atm")
+        PcB = uc(db[dat[1]]['critP'],dbmd[dat[1]]['critP']['units'],"atm")
         TcB = db[dat[1]]['critT']
         mWB = db[dat[1]]['fW']
         T = dat[2]
@@ -347,4 +340,3 @@ if __name__ == "__main__":
     eps = epsilonPerk(cIDs,db)
     sig.append([ljdb[cID]['sigma /angstrom'] for cID in cIDs])
     eps.append([ljdb[cID]['epsilonpk /K'] for cID in cIDs])
-    

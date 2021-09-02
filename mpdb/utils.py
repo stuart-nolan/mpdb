@@ -2,7 +2,7 @@
 mpdb: Material Property Data Base as python module
 utils.py: mpdb utilities
 
-Revision Date: 2021.08.15
+Revision Date: 2021.09.02
 
 SPDX-License-Identifier: BSD-2-Clause
 Copyright (c) 2021 Stuart Nolan. All rights reserved.
@@ -315,6 +315,43 @@ def dbSubset(keys, db):
     dbSubset = deepcopy({key:val for key,val in db.items() if key in keys})
     return dbSubset
 
+def func_2arg(arg1,arg2):
+    print('arg1 is \"%s\" and arg2 is \"%s\"' % (arg1,arg2))
+
+def funcDisp(method,*args):
+    """
+    ref method for function dispatcher from python module
+    usage:
+      f2arg = funcDisp("2arg")
+      f2arg(1,"argument 2") 
+      returns:
+        arg1 is 1 and arg2 is argument 2
+    
+    """
+    return getattr(__import__(__name__),'func_%s' % method)
+
+def funcDisp_2(obj,method,*args):
+    """
+    ref mehtod 2 for function dispatcher (works with/in python and/or cython)
+
+    usage:
+
+    from mpdb.eq import yaws_cython as yceq
+    from mpdb.utils import dbLoad, funcDisp_2
+    (db, dbmd) = dbLoad(interactive=True)
+    vP = funcDisp_2(yceq,"vaporPressure")
+    #vP = yceq.vaporPressure # alternatively
+    vP(298.15,db['water']['vPP'])
+    23.782012939453125
+    yceq.vaporPressure(298.15,db['water']['vPP'])
+    23.782012939453125
+    %timeit yceq.vaporPressure(298.15,db['water']['vPP'])
+    523 ns ± 1.57 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+    %timeit vP(298.15,db['water']['vPP'])
+    526 ns ± 7.11 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+    """
+    return getattr(obj,'%s' % method)
+
 def rSanderSelect(dbItem,index=0,interactive=False):
     """
     rSanderSelect(dbItem,index=0,interactive=False)
@@ -375,6 +412,10 @@ def rSanderSelect(dbItem,index=0,interactive=False):
                 inStr = invalStr + inStr
 
 if __name__ == "__main__":
+    #kludge for __file__ and sys.argv[0] not working when called from exec()
+    import inspect
+    wDir = os.path.dirname(os.path.realpath(inspect.getabsfile(__name__)))
+    
     #%run ycph
     yDataDir = os.path.join(mpdb.pref['dataDir'],'yaws',)
     (db, dbmd) = dbLoad(interactive=True,dataDir=yDataDir)

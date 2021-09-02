@@ -2,7 +2,7 @@
 mpdb: Material Property Data Base as python module
 yaws_cython.pyx: equations for "yaws" thermophysical proptery estimation
 
-Revision Date: 2021.08.16
+Revision Date: 2021.09.02
 
 SPDX-License-Identifier: BSD-2-Clause
 Copyright (c) 2021 Stuart Nolan. All rights reserved.
@@ -347,25 +347,3 @@ cpdef float waterSolubility(float T, list wSP):
       water solubility in ppm by weight at T
     """
     return 10**(wSP[0] + wSP[1]/T + wSP[2]/T**2)
-
-def yawsEqn(obj,method,*args):
-    """
-    yaws equation cython function dispatcher
-
-    usage:
-
-    from mpdb.eq import yawsEqns as yeqs
-    from mpdb.utils import dbLoad
-    (db, dbmd) = dbLoad(interactive=True)
-    vP = yeqs.yawsEqn(yeqs,"vaporPressure")
-    #vP = yeqs.vaporPressure # alternatively
-    vP(298.15,db['water']['vPP'])
-    23.782012939453125
-    yeqs.vaporPressure(298.15,db['water']['vPP'])
-    23.782012939453125
-    %timeit yeqs.vaporPressure(298.15,db['water']['vPP'])
-    523 ns ± 1.57 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-    %timeit vP(298.15,db['water']['vPP'])
-    526 ns ± 7.11 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-    """
-    return getattr(obj,'%s' % method)

@@ -63,7 +63,7 @@ def liquidHeatCapacity(T, hCP):
     """
     liquidHeatCapacity(T, hCP)
 
-    liquidHeatCapacity = A + B*T + C*T^2 + D*T^3
+    liquidHeatCapacity (J/mol/K) = A + B*T + C*T^2 + D*T^3
     
     Parameters
       T, temperature
@@ -71,7 +71,7 @@ def liquidHeatCapacity(T, hCP):
       A, B, C, and D are regression coefficients  
 
     Returns
-      heat capacity at T
+      heat capacity in J/mol/K at T
     """
     return lHCP[0] + lHCP[1]*T + lHCP[2]*T**2 + lHCP[3]*T**3
 
@@ -107,7 +107,7 @@ def liquidThermalConductivity(T, lTCP):
     Returns
       liquid thermal conductivity in W/m/K at T
     """
-    return 10**(oLTCP[0] + oLTCP[1]*(1-T/oLTCP[2])**(2.0/7.0))
+    return 10**(lTCP[0] + lTCP[1]*(1-T/lTCP[2])**(2.0/7.0))
 
 def liquidViscosity(T, lVP):
     """
@@ -205,7 +205,7 @@ def thermalConductivity(T, tCP):
     Returns
       thermal conductivity in W/m/K at T
     """
-    return iOTCP[0] + iOTCP[1]*T + iOTCP[2]*T**2
+    return tCP[0] + tCP[1]*T + tCP[2]*T**2
 
 def vaporEnthalpy(T, hCP, TRef=298.15):
     """
@@ -306,9 +306,9 @@ def vaporThermalConductivity(T, vTCP):
     """
     return vTCP[0] + vTCP[1]*T + vTCP[2]*T**2
 
-def vaporViscosity(T, vP):
+def vaporViscosity(T, vVP):
     """
-    vaporViscosity(T, vP)
+    vaporViscosity(T, vVP)
 
     vaporViscosity (micropoise) = A + B*T + C*T^2
     
